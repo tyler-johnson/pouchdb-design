@@ -1,5 +1,5 @@
 {
-	"name": "pouch-design",
+	"name": "pouchdb-design",
 	"version": "0.0.0",
 	"description": "Design doc helpers for PouchDB.",
 	"author": "Tyler Johnson <tyler@vintyge.com>",
