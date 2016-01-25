@@ -1,16 +1,24 @@
-function validateName(name) {
+import isPlainObject from "is-plain-object";
+
+function validateName(name, type) {
 	if (typeof name !== "string" || name === "") {
-		throw new Error("Expecting non-empty string for validation name.");
+		throw new Error(`Expecting non-empty string for ${type} name.`);
 	}
 }
 
-function normalizeFunction(fn) {
-	if (typeof fn === "function") fn = fn.toString();
-	return typeof fn !== "string" || !fn ? null : fn;
+function normalizeValue(value) {
+	if (value != null) {
+		if (typeof value === "object" && !isPlainObject(value)) {
+			value = value.toJSON();
+		} else if (!~["string","number","boolean"].indexOf(typeof value)) {
+			value = value.toString();
+		}
+	}
+
+	return value;
 }
 
 const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
-const method_names = [ "view", "show", "list", "update", "filter", "validate" ];
 
 class Design {
 	constructor(db, id) {
@@ -26,54 +34,68 @@ class Design {
 		return id;
 	}
 
-	_setMethod(key, name, value) {
-		name = validateName(name);
-		if (!this.doc[key]) this.doc[key] = {};
-		this.doc[key][name] = value;
+	set(path, value) {
+		let parts;
+		if (typeof path === "string") {
+			parts = path.split("/").filter(Boolean);
+		} else if (Array.isArray(path)) {
+			parts = path;
+		} else {
+			throw new Error("Invalid path.");
+		}
+
+		if (parts.length < 1) throw new Error("Missing path.");
+
+		let last = parts.pop();
+		let obj = parts.reduce((o, p) => {
+			if (!has(o,p) || !isPlainObject(o[p])) o[p] = {};
+			return o[p];
+		}, this.doc);
+
+		obj[last] = normalizeValue(value);
+		return this;
 	}
 
 	view(name, map, reduce) {
-		name = validateName(name);
+		validateName(name, "view");
 
 		if (typeof map === "object" && map != null && reduce == null) {
 			[reduce,map]=[map.reduce,map.map];
 		}
 
-		map = normalizeFunction(map);
-		reduce = normalizeFunction(reduce);
-		this._setMethod("views", name, map == null && reduce == null ? null : { map, reduce });
+		if (typeof map !== "undefined") {
+			this.set([ "views", name, "map" ], map);
+		}
+
+		if (typeof reduce !== "undefined") {
+			this.set([ "views", name, "reduce" ], reduce);
+		}
 
 		return this;
 	}
 
 	show(name, fn) {
-		fn = normalizeFunction(fn);
-		this._setMethod("shows", name, fn);
-		return this;
+		validateName(name, "show");
+		return this.set([ "shows", name ], fn);
 	}
 
 	list(name, fn) {
-		fn = normalizeFunction(fn);
-		this._setMethod("lists", name, fn);
-		return this;
+		validateName(name, "list");
+		return this.set([ "lists", name ], fn);
 	}
 
 	update(name, fn) {
-		fn = normalizeFunction(fn);
-		this._setMethod("updates", name, fn);
-		return this;
+		validateName(name, "update");
+		return this.set([ "updates", name ], fn);
 	}
 
 	filter(name, fn) {
-		fn = normalizeFunction(fn);
-		this._setMethod("filters", name, fn);
-		return this;
+		validateName(name, "filter");
+		return this.set([ "filters", name ], fn);
 	}
 
 	validate(fn) {
-		fn = normalizeFunction(fn);
-		this.doc.validate_doc_update = fn;
-		return this;
+		return this.set("validate_doc_update", fn);
 	}
 
 	merge(doc) {
@@ -84,7 +106,7 @@ class Design {
 
 				for (let name in this.doc[k]) {
 					if (!has(this.doc[k], name)) continue;
-					if (!this.doc[k][name]) delete doc[k][name];
+					if (this.doc[k][name] == null) delete doc[k][name];
 					else doc[k][name] = this.doc[k][name];
 				}
 			} else {
@@ -134,15 +156,11 @@ let plugin = {
 	}
 };
 
-method_names.forEach(function(n) {
+[ "view", "show", "list", "update", "filter", "validate" ].forEach(function(n) {
 	plugin[n] = function(id, ...args) {
 		let d = this.design(id);
 		return d[n].apply(d, args);
 	};
 });
 
-export default function pouchDesign() {
-	return plugin;
-}
-
-pouchDesign.Design = Design;
+export default plugin;
