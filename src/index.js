@@ -1,4 +1,5 @@
 import isPlainObject from "is-plain-object";
+import {isEqual,assign,set,get,unset} from "lodash";
 
 function validateName(name, type) {
 	if (typeof name !== "string" || name === "") {
@@ -18,42 +19,48 @@ function normalizeValue(value) {
 	return value;
 }
 
-const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
-
 class Design {
-	constructor(db, id) {
+	constructor(db, doc) {
 		this.db = db;
-		this.id = id;
-		this.doc = {};
+		if (typeof doc === "string") doc = { _id: doc };
+		this.doc = assign({}, doc);
+		this.id = this.doc._id;
 	}
 
-	get _id() {
-		let id = this.id;
-		if (!id) return;
-		if (!/^_design\//.test(id)) id = "_design/" + id;
-		return id;
+	clone(db) {
+		return new Design(db || this.db, this.doc);
+	}
+
+	get id() {
+		return this.doc._id;
+	}
+
+	set id(id) {
+		if (typeof id === "string" && id !== "") {
+			if (!/^_design\//.test(id)) id = "_design/" + id;
+		} else {
+			id = null;
+		}
+
+		return (this.doc._id = id);
+	}
+
+	get(path) {
+		return get(this.doc, path);
 	}
 
 	set(path, value) {
-		let parts;
-		if (typeof path === "string") {
-			parts = path.split("/").filter(Boolean);
-		} else if (Array.isArray(path)) {
-			parts = path;
-		} else {
-			throw new Error("Invalid path.");
-		}
-
-		if (parts.length < 1) throw new Error("Missing path.");
-
-		let last = parts.pop();
-		let obj = parts.reduce((o, p) => {
-			if (!has(o,p) || !isPlainObject(o[p])) o[p] = {};
-			return o[p];
-		}, this.doc);
-
-		obj[last] = normalizeValue(value);
+		set(this.doc, path, normalizeValue(value));
 		return this;
+	}
+
+	unset(path) {
+		unset(this.doc, path);
+		return this;
+	}
+
+	lib(name, fn) {
+		return this.set(name, "module.exports=" + normalizeValue(fn));
 	}
 
 	view(name, map, reduce) {
@@ -63,14 +70,8 @@ class Design {
 			[reduce,map]=[map.reduce,map.map];
 		}
 
-		if (typeof map !== "undefined") {
-			this.set([ "views", name, "map" ], map);
-		}
-
-		if (typeof reduce !== "undefined") {
-			this.set([ "views", name, "reduce" ], reduce);
-		}
-
+		this.set([ "views", name, "map" ], map);
+		this.set([ "views", name, "reduce" ], reduce);
 		return this;
 	}
 
@@ -98,44 +99,38 @@ class Design {
 		return this.set("validate_doc_update", fn);
 	}
 
-	merge(doc) {
-		for (let k in this.doc) {
-			if (!has(this.doc, k)) continue;
-			if (typeof this.doc[k] === "object") {
-				if (!has(doc, k)) doc[k] = {};
+	fetch() {
+		return this._fetch().then(doc => {
+			this.doc = doc;
+			return this;
+		});
+	}
 
-				for (let name in this.doc[k]) {
-					if (!has(this.doc[k], name)) continue;
-					if (this.doc[k][name] == null) delete doc[k][name];
-					else doc[k][name] = this.doc[k][name];
-				}
-			} else {
-				doc[k] = this.doc[k];
-			}
-		}
+	_fetch() {
+		if (!this.id) throw new Error("Design doc is missing an id.");
+		return this.db.get(this.id).catch(e => {
+			if (e.status !== 404) throw e;
+		});
+	}
 
-		return doc;
+	save() {
+		let upsert = () => {
+			let doc = this.toJSON();
+			return this._fetch().then(d => {
+				if (d) doc._rev = d._rev;
+				if (isEqual(doc, d)) return;
+				return this.db.put(doc).catch((e) => {
+					if (e.status === 409) return upsert();
+					throw e;
+				});
+			});
+		};
+
+		return Promise.resolve().then(upsert);
 	}
 
 	then(resolve, reject) {
-		return Promise.resolve().then(() => {
-			let id = this._id;
-			if (!id) return Promise.reject(new Error("Design doc is missing an id."));
-
-			let upsert = () => {
-				return this.db.get(id).catch((e) => {
-					if (e.status !== 404) throw e;
-				}).then((ex) => {
-					if (!ex) return this.db.post(this.toJSON());
-					return this.db.put(this.merge(ex)).catch((e) => {
-						if (e.status === 409) return upsert();
-						throw e;
-					});
-				});
-			};
-
-			return upsert();
-		}).then(resolve, reject);
+		return this.save().then(resolve, reject);
 	}
 
 	catch(reject) {
@@ -143,24 +138,25 @@ class Design {
 	}
 
 	toJSON() {
-		return this.merge({
-			_id: this._id,
-			language: "javascript"
-		});
+		return assign({ language: "javascript" }, this.doc);
 	}
 }
 
-let plugin = {
-	design: function(id) {
-		return new Design(this, id);
-	}
-};
+// [ "view", "show", "list", "update", "filter", "validate" ].forEach(function(n) {
+// 	plugin[n] = function(id, ...args) {
+// 		let d = this.design(id);
+// 		return d["add" + n[0].toUpperCase() + n.substr(1)].apply(d, args);
+// 	};
+// });
 
-[ "view", "show", "list", "update", "filter", "validate" ].forEach(function(n) {
-	plugin[n] = function(id, ...args) {
-		let d = this.design(id);
-		return d[n].apply(d, args);
+export default function plugin(PouchDB) {
+	PouchDB.Design = Design;
+	PouchDB.design = function(doc) {
+		return new Design(null, doc);
 	};
-});
+	PouchDB.plugin(plugin);
+}
 
-export default plugin;
+plugin.design = function(doc) {
+	return new Design(this, doc);
+};
