@@ -1,25 +1,32 @@
 {
   "name": "pouchdb-design",
-  "version": "0.1.0",
   "description": "Design doc helpers for PouchDB.",
   "author": "Tyler Johnson <tyler@vintyge.com>",
+  "repository": {
+    "url": "https://github.com/tyler-johnson/pouchdb-design.git",
+    "type": "git"
+  },
   "main": "index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "lint": "jshint src/ test/",
-    "build": "make",
-    "prepublish": "npm run lint && npm run build"
+    "lint": "eslint src/ test/",
+    "build": "make clean && make",
+    "autorelease": "autorelease pre && npm publish && autorelease post"
   },
   "dependencies": {
-    "is-plain-object": "~2.0.1",
-    "lodash": "~4.0.1"
+    "is-plain-object": "^2.0.1",
+    "lodash": "^4.0.1"
   },
   "devDependencies": {
-    "babel-preset-es2015-rollup": "~1.1.1",
-    "jshint": "~2.9.1",
-    "rollup": "~0.25.1",
-    "rollup-plugin-babel": "~2.3.9",
-    "tape": "~4.4.0"
+    "autorelease": "^1.5.1",
+    "autorelease-github": "^1.1.1",
+    "autorelease-travis": "^1.2.0",
+    "babel-eslint": "^5.0.0",
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "eslint": "~2.2.0",
+    "rollup": "^0.25.1",
+    "rollup-plugin-babel": "^2.3.9",
+    "tape": "^4.4.0"
   },
   "keywords": [],
   "license": "MIT"

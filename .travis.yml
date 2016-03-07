@@ -1,0 +1,16 @@
+sudo: false
+language: node_js
+cache:
+  directories:
+    - node_modules
+node_js:
+  - '5'
+before_install:
+  - npm i -g npm@latest
+install:
+  - npm upgrade && npm prune && npm rebuild
+after_success:
+  - npm run autorelease
+branches:
+  only:
+    - "master"

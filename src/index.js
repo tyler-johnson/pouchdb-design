@@ -135,7 +135,7 @@ class Design {
 			});
 		};
 
-		return Promise.resolve().then(upsert);
+		return upsert();
 	}
 
 	then(resolve, reject) {
@@ -151,13 +151,6 @@ class Design {
 	}
 }
 
-// [ "view", "show", "list", "update", "filter", "validate" ].forEach(function(n) {
-// 	plugin[n] = function(id, ...args) {
-// 		let d = this.design(id);
-// 		return d["add" + n[0].toUpperCase() + n.substr(1)].apply(d, args);
-// 	};
-// });
-
 export default function plugin(PouchDB) {
 	PouchDB.Design = Design;
 	PouchDB.design = function(doc) {
@@ -166,6 +159,7 @@ export default function plugin(PouchDB) {
 	PouchDB.plugin(plugin);
 }
 
+plugin.Design = Design;
 plugin.design = function(doc) {
 	return new Design(this, doc);
 };
