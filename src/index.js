@@ -60,7 +60,16 @@ class Design {
 	}
 
 	lib(name, fn) {
-		return this.set(name, "module.exports=" + normalizeValue(fn));
+		let src = "module.exports=";
+
+		if (typeof fn === "function") {
+			if (fn.name) src += fn.name + ";\n";
+			src += fn.toString();
+		} else {
+			src += normalizeValue(fn);
+		}
+
+		return this.set(name, src);
 	}
 
 	view(name, map, reduce) {
