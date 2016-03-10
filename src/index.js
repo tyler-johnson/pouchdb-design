@@ -165,14 +165,6 @@ class Design {
 		return upsert();
 	}
 
-	then(resolve, reject) {
-		return this.save().then(resolve, reject);
-	}
-
-	catch(reject) {
-		return this.then(null, reject);
-	}
-
 	toJSON() {
 		return assign({ language: "javascript" }, this.doc);
 	}
