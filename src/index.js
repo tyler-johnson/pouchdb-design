@@ -141,9 +141,11 @@ class Design {
 	}
 
 	_fetch() {
-		if (!this.id) throw new Error("Design doc is missing an id.");
-		return this.db.get(this.id).catch(e => {
+		let id = this.id;
+		if (!id) throw new Error("Design doc is missing an id.");
+		return this.db.get(id).catch(e => {
 			if (e.status !== 404) throw e;
+			return { _id: id };
 		});
 	}
 
