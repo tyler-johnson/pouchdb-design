@@ -1,5 +1,5 @@
 import isPlainObject from "is-plain-object";
-import {isEqual,assign,set,get,unset} from "lodash";
+import {forEach,isEqual,assign,set,get,unset} from "lodash";
 
 function validateName(name, type) {
 	if (typeof name !== "string" || name === "") {
@@ -73,6 +73,11 @@ class Design {
 	}
 
 	view(name, map, reduce) {
+		if (typeof name === "object" && !map) {
+			forEach(name, (v, n) => this.view(n, v));
+			return this;
+		}
+
 		validateName(name, "view");
 
 		if (typeof map === "object" && map != null && reduce == null) {
@@ -85,21 +90,41 @@ class Design {
 	}
 
 	show(name, fn) {
+		if (typeof name === "object" && !fn) {
+			forEach(name, (v, n) => this.show(n, v));
+			return this;
+		}
+
 		validateName(name, "show");
 		return this.set([ "shows", name ], fn);
 	}
 
 	list(name, fn) {
+		if (typeof name === "object" && !fn) {
+			forEach(name, (v, n) => this.list(n, v));
+			return this;
+		}
+
 		validateName(name, "list");
 		return this.set([ "lists", name ], fn);
 	}
 
 	update(name, fn) {
+		if (typeof name === "object" && !fn) {
+			forEach(name, (v, n) => this.update(n, v));
+			return this;
+		}
+
 		validateName(name, "update");
 		return this.set([ "updates", name ], fn);
 	}
 
 	filter(name, fn) {
+		if (typeof name === "object" && !fn) {
+			forEach(name, (v, n) => this.filter(n, v));
+			return this;
+		}
+
 		validateName(name, "filter");
 		return this.set([ "filters", name ], fn);
 	}
