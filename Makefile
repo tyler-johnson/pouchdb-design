@@ -7,6 +7,6 @@ index.js: src/index.js $(SRC)
 	$(BIN)/rollup $< -c -f cjs > $@
 
 clean:
-	rm index.js
+	rm -f index.js
 
 .PHONY: build
