@@ -9,8 +9,8 @@ function validateName(name, type) {
 
 function normalizeValue(value) {
 	if (value != null) {
-		if (typeof value === "object" && !isPlainObject(value)) {
-			value = value.toJSON();
+		if (typeof value === "object") {
+			if (!isPlainObject(value)) value = value.toJSON();
 		} else if (!~["string","number","boolean"].indexOf(typeof value)) {
 			value = value.toString();
 		}
