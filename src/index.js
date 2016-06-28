@@ -1,5 +1,4 @@
-import isPlainObject from "is-plain-object";
-import {forEach,isEqual,assign,set,get,unset} from "lodash";
+import {forEach,isEqual,assign,set,get,unset,isPlainObject} from "lodash";
 
 function validateName(name, type) {
 	if (typeof name !== "string" || name === "") {
@@ -175,7 +174,7 @@ export default function plugin(PouchDB) {
 	PouchDB.design = function(doc) {
 		return new Design(null, doc);
 	};
-	PouchDB.plugin(plugin);
+	assign(PouchDB.prototype, plugin);
 }
 
 plugin.Design = Design;
