@@ -1,4 +1,4 @@
-import {forEach,isEqual,assign,set,get,unset,isPlainObject} from "lodash";
+import {forEach,isEqual,assign,set as setValue,get as getValue,unset,isPlainObject} from "lodash";
 
 function validateName(name, type) {
 	if (typeof name !== "string" || name === "") {
@@ -45,11 +45,11 @@ class Design {
 	}
 
 	get(path) {
-		return get(this.doc, path);
+		return getValue(this.doc, path);
 	}
 
 	set(path, value) {
-		set(this.doc, path, normalizeValue(value));
+		setValue(this.doc, path, normalizeValue(value));
 		return this;
 	}
 
