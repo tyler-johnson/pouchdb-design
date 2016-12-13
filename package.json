@@ -8,7 +8,6 @@
     "type": "git"
   },
   "main": "index.js",
-  "jsnext:main": "src/index.js",
   "scripts": {
     "lint": "eslint src/ test/",
     "build": "make clean && make",
