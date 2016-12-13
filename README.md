@@ -21,7 +21,7 @@ PouchDB.plugin(pouchdesign);
 
 ## Usage
 
-This plugin resolves around a class for managing a single design document. Instances of the class have several methods for fetching and saving, modifying design document properties, and adding custom functions and commonjs modules.
+This plugin revolves around a class for managing a single design document. Instances of the class have several methods for fetching and saving, modifying design document properties, and adding custom functions and commonjs modules.
 
 The typical flow is to fetch the existing design document, make some changes, and then save it back to database.
 
@@ -142,33 +142,37 @@ Adds a map and reduce view to the design document under `name`. Several syntaxes
 
 ```
 design.list( name, fn ) → this
+design.list( listObj ) → this
 ```
 
-Adds a list method to the design document under `name`.
+Adds a list method to the design document under `name`. Several list methods can be set using an object.
 
 #### design.show()
 
 ```
 design.show( name, fn ) → this
+design.show( showObj ) → this
 ```
 
-Adds a show method to the design document under `name`.
+Adds a show method to the design document under `name`. Several show methods can be set using an object.
 
 #### design.update()
 
 ```
 design.update( name, fn ) → this
+design.update( updateObj ) → this
 ```
 
-Adds a update method to the design document under `name`.
+Adds a update method to the design document under `name`. Several update methods can be set using an object.
 
 #### design.filter()
 
 ```
 design.filter( name, fn ) → this
+design.filter( filterObj ) → this
 ```
 
-Adds a filter method to the design document under `name`.
+Adds a filter method to the design document under `name`. Several filter methods can be set using an object.
 
 #### design.validate()
 
