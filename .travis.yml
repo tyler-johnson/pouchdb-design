@@ -1,20 +1,26 @@
 sudo: false
 language: node_js
+addons:
+  apt:
+    packages:
+      - xvfb
 cache:
   directories:
     - node_modules
 notifications:
   email: false
 node_js:
-  - '6'
+  - '7'
 before_install:
   - npm i -g npm@latest
 install:
-  - npm upgrade && npm prune && npm rebuild
+  - "export DISPLAY=':99.0'"
+  - 'Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &'
+  - npm install
 before_script:
   - npm run lint
 script:
-  - npm run build
+  - npm test
 after_success:
   - npm run autorelease
 branches:

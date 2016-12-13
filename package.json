@@ -8,26 +8,28 @@
     "type": "git"
   },
   "main": "index.js",
-  "jsnext:main": "src/index.js",
   "scripts": {
     "lint": "eslint src/ test/",
     "build": "make clean && make",
+    "test": "make test",
     "autorelease": "autorelease pre && npm publish && autorelease post"
   },
   "dependencies": {
-    "lodash": "^4.0.1"
+    "lodash": "^4.17.2"
   },
   "devDependencies": {
     "autorelease": "^1.5.1",
     "autorelease-github": "^1.1.1",
     "autorelease-travis": "^1.2.0",
-    "babel-eslint": "^6.1.0",
+    "babel-eslint": "^7.1.0",
     "babel-plugin-lodash": "^3.2.0",
-    "babel-preset-es2015-rollup": "^1.1.1",
-    "eslint": "^2.2.0",
-    "rollup": "^0.33.0",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "browserify": "^13.1.1",
+    "eslint": "^3.11.0",
+    "rollup": "^0.37.0",
     "rollup-plugin-babel": "^2.6.1",
-    "tape": "^4.4.0"
+    "tape": "^4.4.0",
+    "tape-run": "^2.1.4"
   },
   "keywords": [
     "pouchdb",

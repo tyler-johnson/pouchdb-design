@@ -65,7 +65,7 @@ class Design {
 			if (fn.name) src += fn.name + ";\n";
 			src += fn.toString();
 		} else {
-			src += normalizeValue(fn);
+			src += JSON.stringify(fn);
 		}
 
 		return this.set(name, src);
