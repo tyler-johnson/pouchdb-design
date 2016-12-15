@@ -19,6 +19,6 @@ test-browser: test.js
 	$(BIN)/browserify $< --debug | $(BIN)/tape-run
 
 clean:
-	rm -f index.js
+	rm -f index.js test.js
 
-.PHONY: build
+.PHONY: build clean test test-node test-browser
