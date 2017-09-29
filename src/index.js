@@ -14,7 +14,15 @@ function normalizeValue(value) {
 		} else if (type === "function") {
 			const fn = value;
 			value = fn.toString();
-			if (fn.name) value = `function() {\n${value}\nreturn ${fn.name}.apply(this, arguments);\n}`;
+
+			if (fn.name) {
+				let args = [];
+				for (let i = 0; i < fn.length; i++) {
+					args.push(`_a${i}`);
+				}
+
+				value = `function(${args.join(", ")}) {\nreturn (${value}).apply(this, arguments);\n}`;
+			}
 		} else if (!~["string","number","boolean"].indexOf(type)) {
 			value = value.toString();
 		}
