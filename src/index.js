@@ -8,9 +8,14 @@ function validateName(name, type) {
 
 function normalizeValue(value) {
 	if (value != null) {
-		if (typeof value === "object") {
+		const type = typeof value;
+		if (type === "object") {
 			if (!isPlainObject(value)) value = value.toJSON();
-		} else if (!~["string","number","boolean"].indexOf(typeof value)) {
+		} else if (type === "function") {
+			const fn = value;
+			value = fn.toString();
+			if (fn.name) value = `function() {\n${value}\nreturn ${fn.name}.apply(this, arguments);\n}`;
+		} else if (!~["string","number","boolean"].indexOf(type)) {
 			value = value.toString();
 		}
 	}

@@ -5,10 +5,10 @@ TEST = $(wildcard test/* test/*/*)
 build: index.js
 
 index.js: src/index.js $(SRC)
-	$(BIN)/rollup $< -c -f cjs > $@
+	$(BIN)/rollup $< -c > $@
 
 test.js: test/index.js $(TEST)
-	$(BIN)/rollup $< -c -f cjs > $@
+	$(BIN)/rollup $< -c > $@
 
 test: test-node test-browser
 
@@ -19,6 +19,6 @@ test-browser: test.js
 	$(BIN)/browserify $< --debug | $(BIN)/tape-run
 
 clean:
-	rm -f index.js
+	rm -f index.js test.js
 
-.PHONY: build
+.PHONY: build clean test test-node test-browser
