@@ -22,6 +22,7 @@
     "autorelease": "^1.5.1",
     "autorelease-github": "^1.1.1",
     "autorelease-travis": "^1.2.0",
+    "babel-core": "^6.26.0",
     "babel-eslint": "^8.0.1",
     "babel-preset-env": "^1.6.0",
     "browserify": "^14.4.0",
