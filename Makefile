@@ -5,10 +5,10 @@ TEST = $(wildcard test/* test/*/*)
 build: index.js
 
 index.js: src/index.js $(SRC)
-	$(BIN)/rollup $< -c -f cjs > $@
+	$(BIN)/rollup $< -c > $@
 
 test.js: test/index.js $(TEST)
-	$(BIN)/rollup $< -c -f cjs > $@
+	$(BIN)/rollup $< -c > $@
 
 test: test-node test-browser
 

@@ -1,6 +1,19 @@
 import test from "tape";
 import plugin from "../src/index.js";
 
+function exec(source, scope) {
+  const keys = [];
+  const values = [];
+  for (let key in scope) {
+    if (scope.hasOwnProperty(key)) {
+      keys.push(key);
+      values.push(scope[key]);
+    }
+  }
+  keys.push("return (" + source.replace(/;\s*$/, "") + ");");
+  return Function.apply(null, keys).apply(null, values);
+}
+
 test("constructor accepts full design document", (t) => {
   t.plan(2);
 
@@ -98,9 +111,12 @@ test("saves document", (t) => {
 test("sets value", (t) => {
   t.plan(1);
   const design = new plugin.Design(null, "mydesign");
-  const fn = function(){};
-  design.set("foo", fn);
-  t.equals(design.get("foo"), fn.toString(), "set a function");
+  const adder = function(n) {
+    return n + n;
+  };
+  design.set("foo", adder);
+  const fn = exec(design.get("foo"));
+  t.equals(fn(2), 4, "set a function");
 });
 
 test("unsets value", (t) => {
@@ -122,38 +138,56 @@ test("adds commonjs module", (t) => {
 test("adds view with map", (t) => {
   t.plan(1);
   const design = new plugin.Design(null, "mydesign");
-  const fn = function(){};
-  design.view("foo", fn);
+  const adder = function(n) {
+    return n + n;
+  };
+  design.view("foo", adder);
   const doc = design.toJSON();
-  t.equals(doc.views.foo.map, fn.toString(), "set view map");
+  t.equals(exec(doc.views.foo.map)(2), 4, "set view map");
 });
 
 test("adds view with map and reduce", (t) => {
   t.plan(2);
   const design = new plugin.Design(null, "mydesign");
-  const fn = function(){};
-  design.view("foo", fn, fn);
+  const adder = function(n) {
+    return n + n;
+  };
+  design.view("foo", adder, adder);
   const doc = design.toJSON();
-  t.equals(doc.views.foo.map, fn.toString(), "set view map");
-  t.equals(doc.views.foo.reduce, fn.toString(), "set view reduce");
+  t.equals(exec(doc.views.foo.map)(2), 4, "set view map");
+  t.equals(exec(doc.views.foo.reduce)(2), 4, "set view reduce");
 });
 
 ["show","list","update","filter"].forEach(type => {
   test(`adds ${type}`, (t) => {
     t.plan(1);
     const design = new plugin.Design(null, "mydesign");
-    const fn = function(){};
-    design[type]("foo", fn);
+    const adder = function(n) {
+      return n + n;
+    };
+    design[type]("foo", adder);
     const doc = design.toJSON();
-    t.equals(doc[type + "s"].foo, fn.toString(), `set ${type}`);
+    t.equals(exec(doc[type + "s"].foo)(2), 4, `set ${type}`);
   });
 });
 
 test("adds validate_doc_update", (t) => {
   t.plan(1);
   const design = new plugin.Design(null, "mydesign");
-  const fn = function(){};
-  design.validate(fn);
+  const adder = function(n) {
+    return n + n;
+  };
+  design.validate(adder);
   const doc = design.toJSON();
-  t.equals(doc.validate_doc_update, fn.toString(), "set validate_doc_update");
+  t.equals(exec(doc.validate_doc_update)(2), 4, "set validate_doc_update");
+});
+
+test("add named function", (t) => {
+  t.plan(1);
+  const design = new plugin.Design(null, "mydesign");
+  function adder(n) {
+    return n + n;
+  }
+  design.set("name_test", adder);
+  t.equals(exec(design.get("name_test"))(2), 4, "set named function");
 });

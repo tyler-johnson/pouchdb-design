@@ -22,15 +22,14 @@
     "autorelease": "^1.5.1",
     "autorelease-github": "^1.1.1",
     "autorelease-travis": "^1.2.0",
-    "babel-eslint": "^7.1.0",
-    "babel-plugin-lodash": "^3.2.0",
-    "babel-preset-es2015-rollup": "^3.0.0",
-    "browserify": "^13.1.1",
-    "eslint": "^3.11.0",
-    "rollup": "^0.37.0",
-    "rollup-plugin-babel": "^2.6.1",
+    "babel-eslint": "^8.0.1",
+    "babel-preset-env": "^1.6.0",
+    "browserify": "^14.4.0",
+    "eslint": "^4.7.2",
+    "rollup": "^0.50.0",
+    "rollup-plugin-babel": "^3.0.2",
     "tape": "^4.4.0",
-    "tape-run": "^2.1.4"
+    "tape-run": "^3.0.0"
   },
   "keywords": [
     "pouchdb",
